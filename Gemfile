@@ -1,0 +1,8 @@
+source "https://rubygems.org"
+gem "httparty"
+gem "nokogiri"
+gem "addressable"
+gem "rss"
+gem "dotenv"
+gem "fuzzy-string-match"
+gem "pry"
