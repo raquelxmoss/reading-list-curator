@@ -24,7 +24,7 @@ module AIExtract
           { "title": "Another Book", "author": "" }
         ]
         No explanations, no extra text, no Markdown formatting.
-      
+
         Comments:
         #{batch.join("\n")}
       PROMPT

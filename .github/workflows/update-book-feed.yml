@@ -1,0 +1,47 @@
+name: Update Book Recommendations Feed
+
+on:
+  schedule:
+    # Run every day at 9 AM UTC (adjust to your preference)
+    # This ensures we catch new comments throughout the month
+    - cron: '0 9 * * *'
+  workflow_dispatch: # Allow manual trigger for testing
+
+jobs:
+  update-feed:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+        bundler-cache: true # Runs 'bundle install' and caches installed gems
+        
+    - name: Run book curator script
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+      run: |
+        bundle exec ruby moneydiaries.rb
+        
+    - name: Check if RSS feed changed
+      id: check_changes
+      run: |
+        if git diff --quiet book_recommendations.rss; then
+          echo "changed=false" >> $GITHUB_OUTPUT
+        else
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Commit and push if changed
+      if: steps.check_changes.outputs.changed == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add book_recommendations.rss
+        git commit -m "Update book recommendations feed [skip ci]"
+        git push
