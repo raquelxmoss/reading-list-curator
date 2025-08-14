@@ -46,9 +46,12 @@ module RSSGenerator
   def self.format_description(book)
     parts = []
     
-    # Add main description
+    # Add main description (truncated if too long)
     if book[:description]
-      parts << "<p><strong>Description:</strong> #{book[:description]}</p>"
+      truncated = book[:description].length > 300 ? 
+        "#{book[:description][0..297]}..." : 
+        book[:description]
+      parts << "<p><strong>Description:</strong> #{truncated}</p>"
     end
     
     # Add book metadata
@@ -67,9 +70,9 @@ module RSSGenerator
       parts << "<p><img src=\"#{book[:thumbnail]}\" alt=\"#{book[:title]} cover\" style=\"max-width: 200px;\"/></p>"
     end
     
-    # Add link
-    if book[:google_books_link]
-      parts << "<p><a href=\"#{book[:google_books_link]}\">View on Google Books</a></p>"
+    # Add Goodreads link if we have ISBN
+    if book[:isbn]
+      parts << "<p><a href=\"https://www.goodreads.com/book/isbn/#{book[:isbn]}\">📚 Add to Goodreads</a></p>"
     end
     
     parts.join("\n")
