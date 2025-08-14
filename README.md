@@ -2,44 +2,63 @@
 
 Automatically curates book recommendations from r/MoneyDiariesACTIVE monthly threads into an RSS feed.
 
-## Setup Instructions
+## Current Status
 
-### 1. Push to GitHub
-First, create a new repository on GitHub and push this code:
+**Note:** GitHub Actions is blocked by Reddit, so this runs locally via cron job instead.
+
+## Local Setup
+
+### Prerequisites
+- Ruby installed
+- Bundle installed (`gem install bundler`)
+- Git configured with push access to your GitHub repo
+
+### Installation
 
 ```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/reading-list-curator.git
-git push -u origin main
+# Clone the repo
+git clone https://github.com/YOUR_USERNAME/reading-list-curator.git
+cd reading-list-curator
+
+# Install dependencies
+bundle install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your OPENAI_API_KEY and REDDIT_USER_AGENT
 ```
 
-### 2. Add GitHub Secrets
-Go to your repository's Settings → Secrets and variables → Actions, and add:
+### Running Manually
 
-- `OPENAI_API_KEY`: Your OpenAI API key for AI book extraction
-- `REDDIT_USER_AGENT`: Your Reddit user agent (e.g., "md-curator/1.0 by yourusername")
+```bash
+ruby moneydiaries.rb
+```
 
-### 3. Enable GitHub Actions
-The workflow will:
-- Run daily at 9 AM UTC (you can adjust in `.github/workflows/update-book-feed.yml`)
-- Fetch the latest comments from MoneyDiariesACTIVE book threads
-- Extract book recommendations using AI
-- Enrich with Google Books data
-- Generate and commit an RSS feed
+This will:
+1. Fetch the latest MoneyDiariesACTIVE book thread
+2. Extract all comments
+3. Use AI to identify book recommendations
+4. Enrich with Google Books data
+5. Generate `book_recommendations.rss`
 
-### 4. Manual Run (for testing)
-Go to Actions tab → "Update Book Recommendations Feed" → "Run workflow"
+### Push to GitHub
 
-### 5. Subscribe to RSS Feed
-Once running, your RSS feed will be available at:
+After running, push the updated RSS feed:
+
+```bash
+git add book_recommendations.rss
+git commit -m "Update book recommendations"
+git push
+```
+
+## RSS Feed Access
+
+Your RSS feed will be available at:
 `https://raw.githubusercontent.com/YOUR_USERNAME/reading-list-curator/main/book_recommendations.rss`
 
-### 6. Set up ConvertKit
+## ConvertKit Setup
 1. In ConvertKit, go to Broadcasts → RSS
-2. Add your RSS feed URL
+2. Add your RSS feed URL from above
 3. Configure digest frequency (weekly/monthly)
 4. Customize email template
 5. You'll receive book recommendations right in your inbox!
