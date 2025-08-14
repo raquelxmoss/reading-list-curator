@@ -13,6 +13,9 @@
 # Used by dotenv library to load environment variables.
 .env
 
+# Deduplication tracking file
+dedup_tracking.json
+
 # Ignore Byebug command history file.
 .byebug_history
 
