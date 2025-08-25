@@ -8,7 +8,21 @@
     <title>MoneyDiariesACTIVE Book Recommendations</title>
     <link>https://reddit.com/r/MoneyDiariesACTIVE</link>
     <description>Monthly book recommendations from r/MoneyDiariesACTIVE</description>
-    <pubDate>Fri, 22 Aug 2025 08:00:03 +1200</pubDate>
-    <dc:date>2025-08-22T08:00:03+12:00</dc:date>
+    <pubDate>Tue, 26 Aug 2025 08:00:05 +1200</pubDate>
+    <item>
+      <title>Wild Dark Shore by Charlotte McConaghy</title>
+      <link>http://books.google.com/books?id=5WI8EQAAQBAJ&amp;dq=intitle:Wild+Dark+Shore&amp;hl=&amp;source=gbs_api</link>
+      <description>&lt;p&gt;&lt;strong&gt;Description:&lt;/strong&gt; &#39;At once a gripping mystery, an exquisitely written ode to the natural world, and a taut, psychological thriller, Wild Dark Shore is a triumph. Charlotte McConaghy is masterful in her ability to show the intricate connections between place and the human heart, and Wild Dark Shore shows her at the ...&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Details:&lt;/strong&gt;&lt;br/&gt;Published: 2025-03-04&lt;br/&gt;Pages: 322&lt;br/&gt;Categories: Fiction&lt;br/&gt;ISBN: 9781761620003&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://books.google.com/books/content?id=5WI8EQAAQBAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;edge=curl&amp;source=gbs_api&quot; alt=&quot;Wild Dark Shore cover&quot; style=&quot;max-width: 200px;&quot;/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.goodreads.com/book/isbn/9781761620003&quot;&gt;📚 Add to Goodreads&lt;/a&gt;&lt;/p&gt;</description>
+      <enclosure url="http://books.google.com/books/content?id=5WI8EQAAQBAJ&amp;printsec=frontcover&amp;img=1&amp;zoom=1&amp;edge=curl&amp;source=gbs_api"
+        length="0"
+        type="image/jpeg"/>
+      <pubDate>Tue, 04 Mar 2025 00:00:00 +1300</pubDate>
+      <guid isPermaLink="false">9781761620003</guid>
+      <dc:date>2025-03-04T00:00:00+13:00</dc:date>
+    </item>
+    <dc:date>2025-08-26T08:00:05+12:00</dc:date>
   </channel>
 </rss>
