@@ -100,7 +100,11 @@ module Reddit
     nodes.each do |n|
       data = n["data"] || next
       if data["body"] && data["id"]
-        acc << { id: data["id"], body: data["body"] }
+        acc << {
+          id: data["id"],
+          body: data["body"],
+          created_utc: data["created_utc"]
+        }
       end
 
       replies = data["replies"]

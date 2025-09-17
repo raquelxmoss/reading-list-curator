@@ -46,7 +46,7 @@ end.compact
 
 require_relative "lib/rss_generator"
 
-rss_feed = RSSGenerator.generate_feed(enriched_books, {
+rss_feed = RSSGenerator.merge_and_generate_feed(enriched_books, "book_recommendations.rss", {
   title: "MoneyDiariesACTIVE Book Recommendations",
   description: "Monthly book recommendations from r/MoneyDiariesACTIVE",
   link: "https://reddit.com/r/MoneyDiariesACTIVE"

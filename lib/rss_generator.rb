@@ -8,13 +8,13 @@ module RSSGenerator
     title = options[:title] || "Reading List Recommendations"
     description = options[:description] || "Book recommendations curated from Reddit"
     link = options[:link] || "https://example.com"
-    
+
     RSS::Maker.make("2.0") do |maker|
       maker.channel.title = title
       maker.channel.description = description
       maker.channel.link = link
       maker.channel.updated = Time.now.to_s
-      
+
       books.each do |book|
         maker.items.new_item do |item|
           item.title = format_title(book)
@@ -23,7 +23,7 @@ module RSSGenerator
           item.pubDate = parse_date(book[:published_date])
           item.guid.content = book[:isbn] || "#{book[:title]}-#{book[:authors]}".downcase.gsub(/\s+/, '-')
           item.guid.isPermaLink = false
-          
+
           # Add enclosure for book thumbnail if available
           if book[:thumbnail]
             item.enclosure.url = book[:thumbnail]
@@ -34,9 +34,86 @@ module RSSGenerator
       end
     end
   end
+
+  def self.load_existing_feed(file_path)
+    return [] unless File.exist?(file_path)
+
+    begin
+      rss = RSS::Parser.parse(File.read(file_path))
+      rss.items.map do |item|
+        {
+          title: extract_title_from_formatted(item.title),
+          authors: extract_author_from_formatted(item.title),
+          google_books_link: item.link,
+          description: extract_description_from_html(item.description),
+          published_date: item.pubDate ? item.pubDate.strftime('%Y-%m-%d') : nil,
+          isbn: item.guid.content.match(/^\d+$/) ? item.guid.content : nil,
+          thumbnail: item.enclosure ? item.enclosure.url : nil,
+          categories: extract_categories_from_html(item.description),
+          page_count: extract_page_count_from_html(item.description)
+        }
+      end
+    rescue => e
+      puts "Warning: Could not parse existing RSS feed: #{e.message}"
+      []
+    end
+  end
+
+  def self.merge_and_generate_feed(new_books, existing_file_path, options = {})
+    existing_books = load_existing_feed(existing_file_path)
+    existing_isbns = existing_books.map { |book| book[:isbn] }.compact.to_set
+    existing_titles = existing_books.map { |book| "#{book[:title]}-#{book[:authors]}".downcase }.to_set
+
+    # Filter out duplicates based on ISBN or title+author
+    unique_new_books = new_books.reject do |book|
+      isbn_match = book[:isbn] && existing_isbns.include?(book[:isbn])
+      title_match = existing_titles.include?("#{book[:title]}-#{book[:authors]}".downcase)
+      isbn_match || title_match
+    end
+
+    puts "Found #{unique_new_books.size} new unique books to add (#{new_books.size - unique_new_books.size} duplicates filtered out)"
+
+    all_books = existing_books + unique_new_books
+    generate_feed(all_books, options)
+  end
   
   private
-  
+
+  def self.extract_title_from_formatted(formatted_title)
+    # Extract title from "Title by Author" format
+    formatted_title.split(' by ').first
+  end
+
+  def self.extract_author_from_formatted(formatted_title)
+    # Extract author from "Title by Author" format
+    parts = formatted_title.split(' by ')
+    parts.length > 1 ? parts.last : "Unknown Author"
+  end
+
+  def self.extract_description_from_html(html_description)
+    # Extract the main description text from HTML
+    return nil unless html_description
+
+    match = html_description.match(/<strong>Description:<\/strong>\s*([^<]+)/m)
+    match ? match[1].strip.gsub(/\.\.\.$/, '') : nil
+  end
+
+  def self.extract_categories_from_html(html_description)
+    # Extract categories from HTML description
+    return nil unless html_description
+
+    match = html_description.match(/Categories:\s*([^<]+)/m)
+    match ? match[1].strip : nil
+  end
+
+  def self.extract_page_count_from_html(html_description)
+    # Extract page count from HTML description
+    return nil unless html_description
+
+    match = html_description.match(/Pages:\s*(\d+)/m)
+    match ? match[1].to_i : nil
+  end
+
   def self.format_title(book)
     title = book[:title] || "Unknown Title"
     author = book[:authors] || "Unknown Author"
