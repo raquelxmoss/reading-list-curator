@@ -50,7 +50,9 @@ module RSSGenerator
           isbn: item.guid.content.match(/^\d+$/) ? item.guid.content : nil,
           thumbnail: item.enclosure ? item.enclosure.url : nil,
           categories: extract_categories_from_html(item.description),
-          page_count: extract_page_count_from_html(item.description)
+          page_count: extract_page_count_from_html(item.description),
+          sentiment: extract_sentiment_from_html(item.description),
+          review_summary: extract_review_summary_from_html(item.description)
         }
       end
     rescue => e
@@ -114,6 +116,29 @@ module RSSGenerator
     match ? match[1].to_i : nil
   end
 
+  def self.extract_sentiment_from_html(html_description)
+    # Extract sentiment from HTML description (for existing feeds)
+    return nil unless html_description
+
+    if html_description.include?("Community Review 👍")
+      "positive"
+    elsif html_description.include?("Community Review 👎")
+      "negative"
+    elsif html_description.include?("Community Review 📖")
+      "neutral"
+    else
+      nil
+    end
+  end
+
+  def self.extract_review_summary_from_html(html_description)
+    # Extract review summary from HTML description (for existing feeds)
+    return nil unless html_description
+
+    match = html_description.match(/<strong>Community Review [👍👎📖]:<\/strong>\s*([^<]+)/m)
+    match ? match[1].strip : nil
+  end
+
   def self.format_title(book)
     title = book[:title] || "Unknown Title"
     author = book[:authors] || "Unknown Author"
@@ -122,36 +147,51 @@ module RSSGenerator
   
   def self.format_description(book)
     parts = []
-    
+
+    # Add sentiment flag and review summary if available
+    if book[:review_summary] && book[:sentiment]
+      sentiment_emoji = case book[:sentiment]
+                       when "positive" then "👍"
+                       when "negative" then "👎"
+                       else "📖"
+                       end
+
+      parts << "<p><strong>Community Review #{sentiment_emoji}:</strong> #{book[:review_summary]}</p>"
+
+      if book[:original_comment]
+        parts << "<p><em>\"#{book[:original_comment]}\"</em></p>"
+      end
+    end
+
     # Add main description (truncated if too long)
     if book[:description]
-      truncated = book[:description].length > 300 ? 
-        "#{book[:description][0..297]}..." : 
+      truncated = book[:description].length > 300 ?
+        "#{book[:description][0..297]}..." :
         book[:description]
       parts << "<p><strong>Description:</strong> #{truncated}</p>"
     end
-    
+
     # Add book metadata
     metadata = []
     metadata << "Published: #{book[:published_date]}" if book[:published_date]
     metadata << "Pages: #{book[:page_count]}" if book[:page_count] && book[:page_count] > 0
     metadata << "Categories: #{Array(book[:categories]).join(', ')}" if book[:categories]
     metadata << "ISBN: #{book[:isbn]}" if book[:isbn]
-    
+
     if metadata.any?
       parts << "<p><strong>Details:</strong><br/>#{metadata.join('<br/>')}</p>"
     end
-    
+
     # Add thumbnail image
     if book[:thumbnail]
       parts << "<p><img src=\"#{book[:thumbnail]}\" alt=\"#{book[:title]} cover\" style=\"max-width: 200px;\"/></p>"
     end
-    
+
     # Add Goodreads link if we have ISBN
     if book[:isbn]
       parts << "<p><a href=\"https://www.goodreads.com/book/isbn/#{book[:isbn]}\">📚 Add to Goodreads</a></p>"
     end
-    
+
     parts.join("\n")
   end
   

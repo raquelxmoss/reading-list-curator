@@ -32,7 +32,26 @@ threads.each_with_index do |permalink, idx|
   comment_ids = new_comments.map { |c| c[:id] }
 end
 
-books = AIExtract.book_titles_from_comments(all_comments)
+# Extract books with sentiment analysis and reviews
+puts "Analyzing sentiment and extracting reviews..."
+reviewed_books = AIExtract.extract_reviews_and_sentiment(all_comments)
+
+# Also extract just book titles for any missed books
+basic_books = AIExtract.book_titles_from_comments(all_comments)
+
+# Merge the two approaches - prioritize books with reviews
+books_with_reviews = {}
+reviewed_books.each { |book| books_with_reviews["#{book['title']}|#{book['author']}".downcase] = book }
+
+# Add any books that were found by basic extraction but not by review analysis
+basic_books.each do |book|
+  key = "#{book['title']}|#{book['author']}".downcase
+  unless books_with_reviews[key]
+    books_with_reviews[key] = book
+  end
+end
+
+puts "Found #{reviewed_books.size} books with reviews, #{books_with_reviews.size} total books"
 
 # Mark these comments as seen for next run
 deduper.mark_comments_seen(comment_ids)
@@ -40,8 +59,19 @@ puts "Marked #{comment_ids.size} comments as processed"
 
 require_relative "lib/google_books"
 
-enriched_books = books.map do |b|
-  GoogleBooks.search_book(b)
+enriched_books = books_with_reviews.values.map do |b|
+  # Convert string keys to symbol keys and merge with Google Books data
+  book_data = {
+    title: b['title'],
+    authors: b['author'],
+    review_summary: b['review_summary'],
+    sentiment: b['sentiment'],
+    original_comment: b['original_comment']
+  }
+
+  # Get Google Books data and merge
+  google_data = GoogleBooks.search_book(b)
+  google_data ? google_data.merge(book_data) : book_data
 end.compact
 
 require_relative "lib/rss_generator"
