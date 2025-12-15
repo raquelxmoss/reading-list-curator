@@ -6,7 +6,7 @@ module Reddit
   SUB = "MoneyDiariesACTIVE"
 
   def self.search_threads
-    q   = "title:%22Monthly%20Book%20Recommendation%20Thread%22"
+    q   = "title:%22Book%20Recommendation%20Thread%22"
     url = "https://www.reddit.com/r/#{SUB}/search.json?restrict_sr=on&sort=new&q=#{q}"
 
     headers = {
